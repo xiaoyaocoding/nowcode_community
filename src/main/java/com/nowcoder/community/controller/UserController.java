@@ -97,29 +97,26 @@ public class UserController implements CommunityConstant {
 
     @RequestMapping(path = "/header/{fileName}", method = RequestMethod.GET)
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response) {
-        // 服务器存放路径
         fileName = uploadPath + "/" + fileName;
-        // 文件后缀
-        String suffix = fileName.substring(fileName.lastIndexOf("."));
-        // 响应图片
-        response.setContentType("image/" + suffix);
-        try (
-                FileInputStream fis = new FileInputStream(fileName);
-                OutputStream os = response.getOutputStream();
+        String suffix = fileName.substring(fileName.lastIndexOf(".")+1);
+        response.setContentType("image/"+suffix);
+        try(FileInputStream fis = new FileInputStream(fileName);
+            OutputStream os = response.getOutputStream();
         ) {
             byte[] buffer = new byte[1024];
             int b = 0;
-            while ((b = fis.read(buffer)) != -1) {
-                os.write(buffer, 0, b);
+            while((b=fis.read(buffer))!=-1){
+                os.write(buffer,0,b);
             }
         } catch (IOException e) {
-            logger.error("读取头像失败: " + e.getMessage());
+            logger.error("读取头像失败"+e.getMessage());
         }
     }
 
     // 个人主页
     @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
     public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+
         User user = userService.findUserById(userId);
         if (user == null) {
             throw new RuntimeException("该用户不存在!");

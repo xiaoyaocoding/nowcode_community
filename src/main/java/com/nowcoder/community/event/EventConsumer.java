@@ -5,39 +5,63 @@ import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.entity.Message;
 import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.util.CommunityConstant;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.nowcoder.community.util.CommunityConstant.*;
+
 @Component
-public class EventConsumer implements CommunityConstant {
-
+public class EventConsumer implements CommunityConstant{
     private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
-
     @Autowired
     private MessageService messageService;
-
-    @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW})
-    public void handleCommentMessage(ConsumerRecord record) {
-        if (record == null || record.value() == null) {
+    @Component
+    @RocketMQMessageListener(topic = TOPIC_LIKE, consumerGroup = "${rocketmq.consumer.group}")
+    class LikeConsumer implements RocketMQListener<JSONObject>{
+        @Override
+        public void onMessage(JSONObject record) {
+            Consume(record);
+        }
+    }
+    @Component
+    @RocketMQMessageListener(topic = TOPIC_COMMENT, consumerGroup = "${rocketmq.consumer.group}")
+    class CommentConsumer implements RocketMQListener<JSONObject>{
+        @Override
+        public void onMessage(JSONObject record) {
+            Consume(record);
+        }
+    }
+    @Component
+    @RocketMQMessageListener(topic = TOPIC_FOLLOW, consumerGroup = "${rocketmq.consumer.group}")
+    class FollowConsumer implements RocketMQListener<JSONObject>{
+        @Override
+        public void onMessage(JSONObject record) {
+            Consume(record);
+        }
+    }
+    public void Consume(JSONObject record){
+        if (record == null) {
             logger.error("消息的内容为空!");
             return;
         }
 
-        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        Event event = JSONObject.parseObject(record.toString(), Event.class);
         if (event == null) {
             logger.error("消息格式错误!");
             return;
         }
-
+        System.out.println("收到消息"+record);
         // 发送站内通知
+        System.out.println(event.getEntityId());
+        System.out.println(event.getEntityUserId());
         Message message = new Message();
         message.setFromId(SYSTEM_USER_ID);
         message.setToId(event.getEntityUserId());
@@ -58,4 +82,6 @@ public class EventConsumer implements CommunityConstant {
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
     }
+
+
 }
