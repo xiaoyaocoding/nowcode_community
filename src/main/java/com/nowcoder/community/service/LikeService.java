@@ -22,16 +22,20 @@ public class LikeService {
                 String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
                 String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
                 boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);
+                //redis事务开启
                 operations.multi();
                 if (isMember) {
+                    //此时已经点过赞重新点赞默认取消赞
                     operations.opsForSet().remove(entityLikeKey, userId);
                     operations.opsForValue().decrement(userLikeKey);
                 } else {
+                    //未点赞点赞
                     operations.opsForSet().add(entityLikeKey, userId);
                     operations.opsForValue().increment(userLikeKey);
                 }
 
                 return operations.exec();
+                //redis结束，返回命令列表？
             }
         });
     }

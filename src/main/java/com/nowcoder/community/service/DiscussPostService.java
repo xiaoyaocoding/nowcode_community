@@ -1,6 +1,7 @@
 package com.nowcoder.community.service;
 
 import com.nowcoder.community.dao.DiscussPostMapper;
+import com.nowcoder.community.dao.elasticsearch.DiscussPostRepository;
 import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class DiscussPostService {
 
     @Autowired
     private DiscussPostMapper discussPostMapper;
+
+//    @Autowired
+//    private DiscussPostRepository discussRepository;
 
     @Autowired
     private SensitiveFilter sensitiveFilter;
@@ -37,7 +41,7 @@ public class DiscussPostService {
         // 过滤敏感词
         post.setTitle(sensitiveFilter.filter(post.getTitle()));
         post.setContent(sensitiveFilter.filter(post.getContent()));
-
+        //discussRepository.save(discussPostMapper.selectDiscussPostById(post.getUserId()));
         return discussPostMapper.insertDiscussPost(post);
     }
 

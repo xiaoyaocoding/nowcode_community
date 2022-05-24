@@ -23,10 +23,13 @@ public class ExceptionAdvice {
         for (StackTraceElement element : e.getStackTrace()) {
             logger.error(element.toString());
         }
-
+        //"x-requested-with"代表从request中获得的请求类型
         String xRequestedWith = request.getHeader("x-requested-with");
+        //XmlHttpRequest代表请求类型是异步请求
         if ("XMLHttpRequest".equals(xRequestedWith)) {
+            //返回的响应类型是application/plain
             response.setContentType("application/plain;charset=utf-8");
+            //获取到response对应的管道对象（流），通过字符流对管道进行写入
             PrintWriter writer = response.getWriter();
             writer.write(CommunityUtil.getJSONString(1, "服务器异常!"));
         } else {

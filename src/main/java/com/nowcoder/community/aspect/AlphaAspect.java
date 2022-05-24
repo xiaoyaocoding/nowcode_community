@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 //@Component
 //@Aspect
 public class AlphaAspect {
-
+    //第一个*代表返回值，证明返回任意类型都可以，第二个*代表service包下的所有类,第三个*代表所有类下的所有方法,..代表所有参数
     @Pointcut("execution(* com.nowcoder.community.service.*.*(..))")
     public void pointcut() {
 

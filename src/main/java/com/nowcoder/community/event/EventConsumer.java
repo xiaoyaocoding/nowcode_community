@@ -1,8 +1,11 @@
 package com.nowcoder.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Event;
 import com.nowcoder.community.entity.Message;
+import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.ElasticsearchService;
 import com.nowcoder.community.service.MessageService;
 import com.nowcoder.community.util.CommunityConstant;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -23,6 +26,10 @@ public class EventConsumer implements CommunityConstant{
     private static final Logger logger = LoggerFactory.getLogger(EventConsumer.class);
     @Autowired
     private MessageService messageService;
+    @Autowired
+    private DiscussPostService discussPostService;
+    @Autowired
+    private ElasticsearchService elasticsearchService;
     @Component
     @RocketMQMessageListener(topic = TOPIC_LIKE, consumerGroup = "${rocketmq.consumer.group}")
     class LikeConsumer implements RocketMQListener<JSONObject>{
